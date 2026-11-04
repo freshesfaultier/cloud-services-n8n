@@ -1,0 +1,15 @@
+# Einheitlich LF, damit Skripte auf den Linux-VMs auch aus einem Windows-Checkout laufen
+* text=auto eol=lf
+
+# PowerShell und Batch brauchen unter Windows CRLF
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binärdateien nicht anfassen
+*.png binary
+*.jpg binary
+*.pdf binary
+*.docx binary
+*.pptx binary
+*.zip binary

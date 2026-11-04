@@ -1,0 +1,29 @@
+# Secrets: gehören nie ins Repo. Das Repo ist öffentlich.
+.env
+.env.*
+!.env.example
+*.tfvars
+*.tfvars.json
+clouds.yaml
+clouds-public.yaml
+*openrc*
+*.pem
+*.key
+id_rsa
+id_ed25519
+kubeconfig
+*.kubeconfig
+rke2.yaml
+
+# Terraform: Der State kann Secrets enthalten. .terraform.lock.hcl bleibt versioniert.
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Temporäre Dateien von Windows, macOS und Word
+Thumbs.db
+desktop.ini
+.DS_Store
+~$*
