@@ -16,6 +16,7 @@ clouds:
     region_name: "RegionOne"
     interface: "public"
     identity_api_version: 3
-    # Wie endpoint_overrides in den .tf-Dateien, damit auch die OpenStack-CLI
-    # nicht auf der internen VIP landet
-    identity_endpoint_override: https://private-cloud.informatik.hs-fulda.de:5000/v3
+    # Normale Root-Zertifikate plus NetLab-CA, siehe README.md. Ohne diese Zeile
+    # scheitern Keystone-Befehle wie "openstack ec2 credentials create" am
+    # Zertifikat der internen Adresse. Absoluter Pfad, ~ funktioniert hier nicht.
+    cacert: "C:/Users/<name>/.config/openstack/ca-bundle.pem"

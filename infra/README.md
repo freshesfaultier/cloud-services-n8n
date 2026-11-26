@@ -9,22 +9,32 @@ Terraform für die Infrastruktur im OpenStack NetLab: ein RKE2-Kubernetes-Cluste
 | `main.tf`                    | Cluster über das RKE2-Modul aus dem Lab-Repo       |
 | `variables.tf`, `outputs.tf` | Eingaben und Ergebnisse                            |
 | `ssh-keys/`                  | öffentliche SSH-Schlüssel der Gruppe               |
+| `netlab-ca.crt`              | Root-CA des NetLab für die Keystone-Endpunkte      |
 
 ## Voraussetzungen
 
 - NetLab oder NetLab-VPN
 - Terraform ab 1.10
 - OpenStack-CLI: `pip install python-openstackclient`
-- Für `apply`: bash, ssh, rsync und yq, damit das Modul die kubeconfig holen kann
+- Für `apply`, damit das Modul die kubeconfig holen kann: unter Windows PowerShell, OpenSSH und yq, unter Linux und macOS ssh, rsync und yq. Der SSH-Agent muss den eigenen Schlüssel anbieten.
 
 ## Einmal pro Person
 
 1. `clouds.yaml` im Dashboard unter API-Zugriff herunterladen, das Passwort ergänzen und als `~/.config/openstack/clouds.yaml` ablegen. Vorlage: `clouds.yaml.example`.
-2. S3-Schlüssel erzeugen. Aus der Ausgabe braucht man `access` und `secret`.
+2. CA-Datei anlegen. Die Keystone-Endpunkte im Katalog zeigen auf eine interne Adresse mit einem Zertifikat der NetLab-CA. Die CLI vertraut ihr erst, wenn man die normalen Root-Zertifikate und `netlab-ca.crt` zu einer Datei zusammenfügt. Im Ordner `infra/`, in PowerShell:
+   ```
+   Get-Content (python -c "import certifi; print(certifi.where())"), netlab-ca.crt | Set-Content -Encoding ascii "$HOME\.config\openstack\ca-bundle.pem"
+   ```
+   In bash:
+   ```
+   cat "$(python3 -c 'import certifi; print(certifi.where())')" netlab-ca.crt > ~/.config/openstack/ca-bundle.pem
+   ```
+   Dann in `clouds.yaml` die Zeile `cacert` mit dem absoluten Pfad dieser Datei eintragen, siehe Vorlage.
+3. S3-Schlüssel erzeugen. Aus der Ausgabe braucht man `access` und `secret`.
    ```
    openstack ec2 credentials create
    ```
-3. Eigenen öffentlichen SSH-Schlüssel als `ssh-keys/<name>.pub` committen. Ein neuer Schlüssel ersetzt beim nächsten `apply` alle VMs.
+4. Eigenen öffentlichen SSH-Schlüssel als `ssh-keys/<name>.pub` committen. Ein neuer Schlüssel ersetzt beim nächsten `apply` alle VMs.
 
 ## Einmal für die Gruppe
 
