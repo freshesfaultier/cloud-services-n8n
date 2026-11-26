@@ -15,10 +15,12 @@ kubeconfig
 *.kubeconfig
 rke2.yaml
 
-# Terraform: Der State kann Secrets enthalten. .terraform.lock.hcl bleibt versioniert.
+# Terraform: State und gespeicherte Pläne können Secrets enthalten. .terraform.lock.hcl bleibt versioniert.
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfplan
+tfplan
 crash.log
 crash.*.log
 
