@@ -1,0 +1,11 @@
+# Nur für ein eigenes Deployment in einem anderen OpenStack-Projekt.
+#
+# Für unser gemeinsames Deployment keine terraform.tfvars anlegen. Sonst baut
+# das apply einer Person den Cluster mit ihren Werten um, und das nächste apply
+# einer anderen Person baut ihn wieder zurück.
+#
+# Kopieren nach terraform.tfvars, die Datei ist per .gitignore ausgeschlossen.
+
+# flavor_name     = "m1.medium"
+# worker_count    = 1
+# registry_mirror = ""  # außerhalb des Hochschulnetzes

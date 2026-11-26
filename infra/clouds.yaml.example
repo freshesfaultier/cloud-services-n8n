@@ -1,0 +1,21 @@
+# Vorlage für ~/.config/openstack/clouds.yaml, nicht in diesen Ordner kopieren.
+# Dort finden Terraform und die OpenStack-CLI die Datei aus jedem Ordner, und
+# das Passwort liegt nicht im Arbeitsverzeichnis des öffentlichen Repos.
+#
+# Die eigene Datei gibt es im Dashboard unter API-Zugriff, das Passwort muss
+# man selbst ergänzen.
+clouds:
+  openstack:
+    auth:
+      auth_url: https://private-cloud.informatik.hs-fulda.de:5000/v3/
+      username: "CloudServ<gruppennummer>"
+      project_id: <projekt-id>
+      project_name: "CloudServ<gruppennummer>"
+      user_domain_name: "Default"
+      password: "<passwort>"
+    region_name: "RegionOne"
+    interface: "public"
+    identity_api_version: 3
+    # Wie endpoint_overrides in den .tf-Dateien, damit auch die OpenStack-CLI
+    # nicht auf der internen VIP landet
+    identity_endpoint_override: https://private-cloud.informatik.hs-fulda.de:5000/v3
