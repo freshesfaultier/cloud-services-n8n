@@ -19,4 +19,5 @@ clouds:
     # Normale Root-Zertifikate plus NetLab-CA, siehe README.md. Ohne diese Zeile
     # scheitern Keystone-Befehle wie "openstack ec2 credentials create" am
     # Zertifikat der internen Adresse. Absoluter Pfad, ~ funktioniert hier nicht.
+    # Windows: C:/Users/<name>/...  Linux: /home/<name>/...  macOS: /Users/<name>/...
     cacert: "C:/Users/<name>/.config/openstack/ca-bundle.pem"
