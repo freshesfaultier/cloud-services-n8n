@@ -1,0 +1,21 @@
+# Werte für das Helm-Chart argo/argo-cd 10.20.0, das ist Argo CD v3.6.3.
+# Installation und Betrieb siehe README.md in diesem Ordner.
+#
+# Alle anderen Einstellungen bleiben auf den Standardwerten des Charts:
+#   helm show values argo/argo-cd --version 10.20.0
+
+# Dex ist der Baustein für SSO, etwa Login mit GitHub. Wir melden uns mit dem
+# lokalen Benutzer admin an und sparen uns den Pod.
+dex:
+  enabled: false
+
+# Benachrichtigungen an Slack, Mail usw. nutzen wir nicht.
+notifications:
+  enabled: false
+
+server:
+  service:
+    # ClusterIP ist der Standard, hier bewusst festgehalten. Mit LoadBalancer
+    # legt OpenStack einen Octavia-Load-Balancer mit Floating IP an. Wir
+    # greifen stattdessen per kubectl port-forward zu.
+    type: ClusterIP
