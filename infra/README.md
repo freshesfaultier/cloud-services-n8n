@@ -131,19 +131,21 @@ Die kubeconfig enthält die Adresse des Clusters und den Admin-Zugang. Sie gehö
 
 ### Wer den Cluster gebaut hat
 
-Das Modul holt die kubeconfig nur, wenn der Controller neu entsteht, und nur auf den Rechner der Person, die `apply` ausgeführt hat. Sie liegt dann in `infra/n8n.rke2.yaml`. In PowerShell:
+Das Modul holt die kubeconfig nur, wenn der Controller neu entsteht, und nur auf den Rechner der Person, die `apply` ausgeführt hat. Sie liegt dann in `infra/n8n.rke2.yaml`. In PowerShell im Ordner `infra/`:
 
 ```
-$env:KUBECONFIG = terraform output -raw kubeconfig
+$env:KUBECONFIG = "$PWD\n8n.rke2.yaml"
 kubectl get nodes
 ```
 
-In bash:
+In bash im Ordner `infra/`:
 
 ```
-export KUBECONFIG=$(terraform output -raw kubeconfig)
+export KUBECONFIG=$PWD/n8n.rke2.yaml
 kubectl get nodes
 ```
+
+`$PWD` macht daraus einen absoluten Pfad, so findet kubectl die Datei auch aus anderen Ordnern.
 
 ### Alle anderen
 
