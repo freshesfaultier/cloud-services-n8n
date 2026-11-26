@@ -101,17 +101,18 @@ terraform apply
 
 ## Deploy
 
-Die S3-Schlüssel in jedem neuen Terminal setzen, in PowerShell:
+Die S3-Schlüssel in jedem neuen Terminal setzen. `Read-Host` und `read` fragen die Werte ab, so landen sie nicht im Befehlsverlauf. In PowerShell:
 
 ```
-$env:AWS_ACCESS_KEY_ID = "<access>"
-$env:AWS_SECRET_ACCESS_KEY = "<secret>"
+$env:AWS_ACCESS_KEY_ID = Read-Host "access"
+$env:AWS_SECRET_ACCESS_KEY = Read-Host "secret"
 ```
 
 In bash:
 
 ```
-export AWS_ACCESS_KEY_ID=<access> AWS_SECRET_ACCESS_KEY=<secret>
+read -p "access: " AWS_ACCESS_KEY_ID && export AWS_ACCESS_KEY_ID
+read -s -p "secret: " AWS_SECRET_ACCESS_KEY && export AWS_SECRET_ACCESS_KEY
 ```
 
 Dann in `infra/`:
@@ -124,7 +125,13 @@ terraform apply
 
 `apply` nur auf aktuellem `main` ausführen, vorher `git pull`. Der State ist gemeinsam, der Code auf dem eigenen Rechner nicht. Mit veraltetem Code löscht `apply` alles, was andere inzwischen gebaut haben.
 
-Nach dem ersten `apply` liegt die kubeconfig in `infra/n8n.rke2.yaml`. In PowerShell:
+## kubeconfig
+
+Die kubeconfig enthält die Adresse des Clusters und den Admin-Zugang. Sie gehört nicht ins Repo und nicht in einen Chat, die `.gitignore` schließt `*.rke2.yaml` aus.
+
+### Wer den Cluster gebaut hat
+
+Das Modul holt die kubeconfig nur, wenn der Controller neu entsteht, und nur auf den Rechner der Person, die `apply` ausgeführt hat. Sie liegt dann in `infra/n8n.rke2.yaml`. In PowerShell:
 
 ```
 $env:KUBECONFIG = terraform output -raw kubeconfig
@@ -137,6 +144,43 @@ In bash:
 export KUBECONFIG=$(terraform output -raw kubeconfig)
 kubectl get nodes
 ```
+
+### Alle anderen
+
+Ein `apply` ohne Änderungen holt keine kubeconfig. Wer den Cluster nicht gebaut hat, holt sie per SSH vom Controller. Das geht, weil alle Schlüssel aus `ssh-keys/` auf den Knoten liegen. Auf dem Controller zeigt die Datei auf `127.0.0.1`, deshalb wird die Adresse durch die Floating IP ersetzt.
+
+In PowerShell im Ordner `infra/`, mit gesetzten S3-Schlüsseln:
+
+```
+$ip = terraform output -raw floating_ip
+ssh -o StrictHostKeyChecking=accept-new ubuntu@$ip "sudo cat /etc/rancher/rke2/rke2.yaml" | ForEach-Object { $_ -replace '127\.0\.0\.1', $ip } | Set-Content -Encoding ascii n8n.rke2.yaml
+$env:KUBECONFIG = "$PWD\n8n.rke2.yaml"
+kubectl get nodes
+```
+
+In bash im Ordner `infra/`:
+
+```
+ip=$(terraform output -raw floating_ip)
+ssh -o StrictHostKeyChecking=accept-new ubuntu@$ip "sudo cat /etc/rancher/rke2/rke2.yaml" | sed "s/127\.0\.0\.1/$ip/" > n8n.rke2.yaml
+chmod 600 n8n.rke2.yaml
+export KUBECONFIG=$PWD/n8n.rke2.yaml
+kubectl get nodes
+```
+
+Der Kontext heißt in dieser Kopie `default` statt `n8n`, das ändert nichts an der Funktion.
+
+Nach einem Neuaufbau hat der Controller einen neuen Host-Schlüssel. Bekommt er dieselbe IP, bricht `ssh` mit „REMOTE HOST IDENTIFICATION HAS CHANGED“ ab. Dann zuerst den alten Eintrag entfernen: `ssh-keygen -R <floating-ip>`.
+
+### Wann man sie neu holen muss
+
+Alle Kopien sind gleichwertig und funktionieren parallel. Der Cluster merkt sich nicht, wer eine Kopie hat.
+
+| Situation                                     | Vorhandene Kopien                                                |
+| --------------------------------------------- | ---------------------------------------------------------------- |
+| `apply` ohne Änderungen                       | bleiben gültig                                                   |
+| Controller ersetzt, z. B. neuer SSH-Schlüssel | bleiben gültig, CA und Zertifikate liegen auf dem eigenen Volume |
+| `destroy` und neues `apply`                   | ungültig, neue CA und meist neue Floating IP, alle holen sie neu |
 
 ## Teardown
 
